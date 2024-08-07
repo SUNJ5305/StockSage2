@@ -3,12 +3,24 @@
 {% block title %}Stock Sage - {{ ticker }} 정보{% endblock %}
 
 {% block content %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <div class="container">
         <h1 class="mt-3">{{ company_name }}</h1>
-        <span> ({{ ticker }}) </span>
-        <span style="background: red; border:1px solid #FAFAFA; width:5%; text-align: center;"  >코스닥</span>
+        <div class="d-flex align-items-center">
+            <span> ({{ ticker }}) </span>
+            <span style="background: red; border:1px solid #FAFAFA; width:5%; text-align: center; margin-left: 10px;">코스닥</span>
 
-        <div class="row">
+            <div class="ms-auto">
+                <button style="background-color: #fff;border: 1px solid black;border-radius: 5px;float: right;font-weight: bold;margin-bottom: 5px;"
+                        id="toggle-favorite" data-ticker="{{ ticker }}" data-is-favorite="{{ is_favorite|yesno:"true,false" }}" class="btn btn-light shadow-none border-0 rounded-circle">
+                    <i class="fa {{ is_favorite|yesno:"fa-star,fa-star-o" }}"></i>
+                    관심 종목
+                </button>
+            </div>
+        </div>
+
+        <div class="row mt-4">
             <div class="col-12">
                 {% if error %}
                     <div class="alert alert-danger" role="alert">
@@ -36,15 +48,6 @@
                 <div id="search-results"></div>
             </div>
         </div>
-
-        <!-- 관심 종목 토글 버튼 -->
-        <button id="toggle-favorite" data-ticker="{{ ticker }}" data-is-favorite="{{ is_favorite|yesno:"true,false" }}">
-            {% if is_favorite %}
-                관심 종목에서 삭제
-            {% else %}
-                관심 종목에 추가
-            {% endif %}
-        </button>
 
         <div class="row mt-4 comments">
             <div class="col-12">
@@ -92,7 +95,7 @@
             $('#toggle-favorite').click(function() {
                 var button = $(this);
                 var stockCode = button.data('ticker');
-                var isFavorite = button.data('is-favorite');
+                var isFavorite = button.data('is-favorite') === 'true';
 
                 $.ajax({
                     url: '{% url "toggle_interest_stock" %}',
@@ -105,10 +108,10 @@
                         if (response.status === 'success') {
                             if (response.action === 'added') {
                                 button.data('is-favorite', 'true');
-                                button.text('관심 종목에서 삭제');
+                                button.find('.fa').removeClass('fa-star-o').addClass('fa-star');
                             } else if (response.action === 'removed') {
                                 button.data('is-favorite', 'false');
-                                button.text('관심 종목에 추가');
+                                button.find('.fa').removeClass('fa-star').addClass('fa-star-o');
                             }
                         } else {
                             alert('작업에 실패했습니다. 다시 시도해 주세요.');
